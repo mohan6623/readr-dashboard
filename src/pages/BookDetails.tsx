@@ -48,7 +48,7 @@ const BookDetails = () => {
     
     if (window.confirm(`Are you sure you want to delete "${book.title}"?`)) {
       try {
-        await bookService.deleteBook(book.id);
+        await bookService.deleteBook(book.id.toString());
         toast({
           title: "Book deleted",
           description: `"${book.title}" has been removed from the library.`,
@@ -156,7 +156,7 @@ const BookDetails = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate(`/admin/books/${book.id}/edit`)}
+                      onClick={() => navigate(`/admin/books/${book.id.toString()}/edit`)}
                     >
                       <Edit className="h-4 w-4 mr-1" />
                       Edit

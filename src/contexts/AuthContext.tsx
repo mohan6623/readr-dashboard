@@ -6,8 +6,8 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
+  register: (username: string, password: string) => Promise<void>;
   logout: () => void;
   loading: boolean;
 }
@@ -30,18 +30,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (username: string, password: string) => {
     try {
-      const response = await authService.login({ email, password });
+      const response = await authService.login({ username, password });
       setUser(response.user);
     } catch (error) {
       throw error;
     }
   };
 
-  const register = async (email: string, password: string, name: string) => {
+  const register = async (username: string, password: string) => {
     try {
-      const response = await authService.register({ email, password, name });
+      const response = await authService.register({ username, password });
       setUser(response.user);
     } catch (error) {
       throw error;
@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const value = {
     user,
     isAuthenticated: !!user,
-    isAdmin: user?.role === 'admin',
+    isAdmin: user?.role === 'ROLE_ADMIN',
     login,
     register,
     logout,

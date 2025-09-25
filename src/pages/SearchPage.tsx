@@ -69,7 +69,7 @@ const SearchPage = () => {
   const handleDelete = async (book: Book) => {
     if (window.confirm(`Are you sure you want to delete "${book.title}"?`)) {
       try {
-        await bookService.deleteBook(book.id);
+        await bookService.deleteBook(book.id.toString());
         setBooks(prev => prev.filter(b => b.id !== book.id));
         toast({
           title: "Book deleted",

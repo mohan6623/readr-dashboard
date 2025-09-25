@@ -13,7 +13,7 @@ class AuthService {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        username: credentials.email, // Backend expects username
+        username: credentials.username,
         password: credentials.password
       }),
     });
@@ -22,19 +22,11 @@ class AuthService {
       throw new Error('Login failed');
     }
 
-    const token = await response.text(); // Backend returns token as string
-    this.setToken(token);
+    const authResponse: AuthResponse = await response.json();
+    this.setToken(authResponse.token);
+    this.setUser(authResponse.user);
     
-    // Create a mock user object since backend doesn't return user info
-    const user: User = {
-      id: '1',
-      email: credentials.email,
-      name: credentials.email,
-      role: 'user' as 'user' | 'admin' // Default role
-    };
-    this.setUser(user);
-    
-    return { token, user };
+    return authResponse;
   }
 
   async register(userData: RegisterData): Promise<AuthResponse> {
@@ -44,9 +36,9 @@ class AuthService {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        username: userData.email,
+        username: userData.username,
         password: userData.password,
-        role: 'ROLE_USER'
+        role: userData.role || 'ROLE_USER'
       }),
     });
 
@@ -55,7 +47,7 @@ class AuthService {
     }
 
     // After registration, attempt to login
-    return this.login({ email: userData.email, password: userData.password });
+    return this.login({ username: userData.username, password: userData.password });
   }
 
   logout(): void {
@@ -86,7 +78,7 @@ class AuthService {
 
   isAdmin(): boolean {
     const user = this.getUser();
-    return user?.role === 'admin';
+    return user?.role === 'ROLE_ADMIN';
   }
 
   private setToken(token: string): void {

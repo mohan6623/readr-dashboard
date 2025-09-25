@@ -1,19 +1,21 @@
 export interface Book {
-  id: string;
+  id: number;
   title: string;
   description: string;
   author: string;
   category: string;
-  image: string;
+  imageName?: string;
+  imageType?: string;
+  image: string; // Base64 or URL for display
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface User {
-  id: string;
+  id: number;
+  name: string;
   email: string;
-  role: 'admin' | 'user';
-  name?: string;
+  role: string;
 }
 
 export interface AuthResponse {
@@ -22,14 +24,14 @@ export interface AuthResponse {
 }
 
 export interface LoginCredentials {
-  email: string;
+  username: string;
   password: string;
 }
 
 export interface RegisterData {
-  email: string;
+  username: string;
   password: string;
-  name: string;
+  role?: string;
 }
 
 export interface BookFormData {

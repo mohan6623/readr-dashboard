@@ -4,6 +4,17 @@ import { authService } from './auth';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 class BookService {
+  private processBookImage = (book: any): Book => {
+    // Convert byte array to base64 string for display if image exists
+    if (book.image && Array.isArray(book.image)) {
+      const base64String = btoa(String.fromCharCode(...book.image));
+      book.image = `data:${book.imageType || 'image/jpeg'};base64,${base64String}`;
+    } else if (!book.image) {
+      book.image = '/placeholder.svg'; // Default placeholder
+    }
+    return book;
+  };
+
   async getAllBooks(): Promise<Book[]> {
     const response = await fetch(`${API_BASE_URL}/books`, {
       headers: {
@@ -15,7 +26,8 @@ class BookService {
       throw new Error('Failed to fetch books');
     }
 
-    return response.json();
+    const books = await response.json();
+    return books.map(this.processBookImage);
   }
 
   async searchBooks(filters: SearchFilters): Promise<Book[]> {
@@ -31,7 +43,8 @@ class BookService {
         throw new Error('Failed to search books');
       }
 
-      return response.json();
+      const books = await response.json();
+      return books.map(this.processBookImage);
     }
 
     // If no query, return all books
@@ -49,13 +62,14 @@ class BookService {
       throw new Error('Failed to fetch book');
     }
 
-    return response.json();
+    const book = await response.json();
+    return this.processBookImage(book);
   }
 
   async createBook(bookData: BookFormData): Promise<Book> {
     const formData = new FormData();
     
-    // Create book object for the backend
+    // Create book object matching BookDto structure
     const bookJson = {
       title: bookData.title,
       description: bookData.description,
@@ -80,18 +94,19 @@ class BookService {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to create book');
+      const error = await response.text();
+      throw new Error(error || 'Failed to create book');
     }
 
-    // Backend returns string, so we need to fetch the created book
+    // Backend returns success message, fetch all books to get the new one
     const books = await this.getAllBooks();
-    return books[books.length - 1]; // Return the last added book
+    return books[books.length - 1];
   }
 
   async updateBook(id: string, bookData: BookFormData): Promise<Book> {
     const formData = new FormData();
     
-    // Create book object for the backend
+    // Create book object matching BookDto structure
     const bookJson = {
       title: bookData.title,
       description: bookData.description,
@@ -116,10 +131,11 @@ class BookService {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to update book');
+      const error = await response.text();
+      throw new Error(error || 'Failed to update book');
     }
 
-    // Backend returns string, so fetch the updated book
+    // Fetch the updated book
     return this.getBookById(id);
   }
 
@@ -132,7 +148,8 @@ class BookService {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to delete book');
+      const error = await response.text();
+      throw new Error(error || 'Failed to delete book');
     }
   }
 }

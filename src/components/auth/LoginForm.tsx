@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Book } from 'lucide-react';
 
 const LoginForm = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -21,7 +21,7 @@ const LoginForm = () => {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login(username, password);
       toast({
         title: "Welcome back!",
         description: "You've successfully logged in.",
@@ -59,13 +59,13 @@ const LoginForm = () => {
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Username/Email</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="username"
+                  type="text"
+                  placeholder="Enter your username or email"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                   className="h-11"
                 />

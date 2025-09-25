@@ -10,7 +10,7 @@ import { Loader2, Book } from 'lucide-react';
 
 const RegisterForm = () => {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ const RegisterForm = () => {
     setLoading(true);
 
     try {
-      await register(email, password, name);
+      await register(username, password);
       toast({
         title: "Welcome aboard!",
         description: "Your account has been created successfully.",
@@ -83,13 +83,13 @@ const RegisterForm = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="username"
+                  type="text"
+                  placeholder="Enter your username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                   className="h-11"
                 />
