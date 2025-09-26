@@ -5,8 +5,12 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 class BookService {
   private processBookImage = (book: any): Book => {
-    // Convert byte array to base64 string for display if image exists
-    if (book.image && Array.isArray(book.image)) {
+    // Use imageBase64 from backend if available, otherwise fallback to byte array conversion
+    if (book.imageBase64) {
+      // Backend provides base64 string directly
+      book.image = `data:${book.imageType || 'image/jpeg'};base64,${book.imageBase64}`;
+    } else if (book.image && Array.isArray(book.image)) {
+      // Fallback: Convert byte array to base64 string for display
       const base64String = btoa(String.fromCharCode(...book.image));
       book.image = `data:${book.imageType || 'image/jpeg'};base64,${base64String}`;
     } else if (!book.image) {
@@ -15,10 +19,20 @@ class BookService {
     return book;
   };
 
+  private checkAuth(): void {
+    const headers = authService.getAuthHeaders();
+    if (!headers.Authorization) {
+      throw new Error('No authentication token available');
+    }
+  }
+
   async getAllBooks(): Promise<Book[]> {
+    this.checkAuth();
+    
     const response = await fetch(`${API_BASE_URL}/books`, {
       headers: {
         ...authService.getAuthHeaders(),
+        // Do NOT set Content-Type here!
       },
     });
 
@@ -31,30 +45,37 @@ class BookService {
   }
 
   async searchBooks(filters: SearchFilters): Promise<Book[]> {
-    // Use title search endpoint from backend
+    // Construct query parameters
+    const params: URLSearchParams = new URLSearchParams();
     if (filters.query) {
-      const response = await fetch(`${API_BASE_URL}/title/${encodeURIComponent(filters.query)}`, {
-        headers: {
-          ...authService.getAuthHeaders(),
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to search books');
-      }
-
-      const books = await response.json();
-      return books.map(this.processBookImage);
+      params.append('title', filters.query);
+    }
+    if (filters.author) {
+      params.append('author', filters.author);
+    }
+    if (filters.category) {
+      params.append('category', filters.category);
     }
 
-    // If no query, return all books
-    return this.getAllBooks();
+    const response = await fetch(`${API_BASE_URL}/books/search?${params.toString()}`, {
+      headers: {
+        ...authService.getAuthHeaders(),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to search books');
+    }
+
+    const books = await response.json();
+    return books.map(this.processBookImage);
   }
 
   async getBookById(id: string): Promise<Book> {
     const response = await fetch(`${API_BASE_URL}/book/${id}`, {
       headers: {
         ...authService.getAuthHeaders(),
+        // Do NOT set Content-Type here!
       },
     });
 
@@ -89,11 +110,10 @@ class BookService {
       method: 'POST',
       headers: {
         ...authService.getAuthHeaders(),
+        // Do NOT set Content-Type for FormData
       },
       body: formData,
-    });
-
-    if (!response.ok) {
+    });    if (!response.ok) {
       const error = await response.text();
       throw new Error(error || 'Failed to create book');
     }
@@ -122,13 +142,14 @@ class BookService {
       formData.append('imageFile', bookData.image);
     }
 
-    const response = await fetch(`${API_BASE_URL}/book/${id}`, {
-      method: 'PUT',
-      headers: {
-        ...authService.getAuthHeaders(),
-      },
-      body: formData,
-    });
+      const response = await fetch(`${API_BASE_URL}/book/${id}`, {
+        method: 'PUT',
+        headers: {
+          ...authService.getAuthHeaders(),
+          // Do NOT set Content-Type for FormData
+        },
+        body: formData,
+      });
 
     if (!response.ok) {
       const error = await response.text();
@@ -144,6 +165,7 @@ class BookService {
       method: 'DELETE',
       headers: {
         ...authService.getAuthHeaders(),
+        // Do NOT set Content-Type here!
       },
     });
 

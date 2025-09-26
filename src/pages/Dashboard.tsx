@@ -26,11 +26,17 @@ const Dashboard = () => {
       const fetchedBooks = await bookService.getAllBooks();
       setBooks(fetchedBooks);
     } catch (error) {
-      toast({
-        title: "Error loading books",
-        description: "Failed to fetch books. Please try again.",
-        variant: "destructive",
-      });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch books';
+      if (errorMessage.includes('authentication')) {
+        // Don't show toast for auth errors, user is likely not logged in
+        console.log('Not authenticated, skipping book load');
+      } else {
+        toast({
+          title: "Error loading books",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }

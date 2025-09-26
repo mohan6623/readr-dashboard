@@ -91,7 +91,12 @@ class AuthService {
 
   getAuthHeaders(): Record<string, string> {
     const token = this.getToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    if (!token) return {};
+    
+    // Only send the Authorization header, nothing else
+    return { 
+      'Authorization': `Bearer ${token}`
+    };
   }
 }
 

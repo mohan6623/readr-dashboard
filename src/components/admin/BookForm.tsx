@@ -62,7 +62,7 @@ const BookForm: React.FC<BookFormProps> = ({
     
     const submitData: BookFormData = {
       ...formData,
-      image: imageFile || (book?.image || ''),
+      image: imageFile || undefined, // Only send File, not base64 string
     };
 
     await onSubmit(submitData);
