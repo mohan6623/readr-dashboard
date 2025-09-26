@@ -31,12 +31,12 @@ const FilterBar: React.FC<FilterBarProps> = ({
         Filters:
       </div>
       
-      <Select value={selectedAuthor || ''} onValueChange={(value) => onAuthorChange(value || null)}>
+      <Select value={selectedAuthor || 'all'} onValueChange={(value) => onAuthorChange(value === 'all' ? null : value)}>
         <SelectTrigger className="w-48">
           <SelectValue placeholder="Select Author" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Authors</SelectItem>
+          <SelectItem value="all">All Authors</SelectItem>
           {authors.map((author) => (
             <SelectItem key={author} value={author}>
               {author}
@@ -45,12 +45,12 @@ const FilterBar: React.FC<FilterBarProps> = ({
         </SelectContent>
       </Select>
       
-      <Select value={selectedCategory || ''} onValueChange={(value) => onCategoryChange(value || null)}>
+      <Select value={selectedCategory || 'all'} onValueChange={(value) => onCategoryChange(value === 'all' ? null : value)}>
         <SelectTrigger className="w-48">
           <SelectValue placeholder="Select Category" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">All Categories</SelectItem>
+          <SelectItem value="all">All Categories</SelectItem>
           {categories.map((category) => (
             <SelectItem key={category} value={category}>
               {category}
