@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Book } from '@/types/book';
 import { bookService } from '@/lib/api';
 import Navigation from '@/components/layout/Navigation';
 import BookGrid from '@/components/ui/BookGrid';
+import FilterBar from '@/components/ui/FilterBar';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Search, Plus } from 'lucide-react';
@@ -12,6 +13,8 @@ import { useNavigate } from 'react-router-dom';
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -69,6 +72,28 @@ const Dashboard = () => {
     }
   };
 
+  // Filter logic
+  const filteredBooks = useMemo(() => {
+    return books.filter(book => {
+      if (selectedAuthor && book.author !== selectedAuthor) return false;
+      if (selectedCategory && book.category !== selectedCategory) return false;
+      return true;
+    });
+  }, [books, selectedAuthor, selectedCategory]);
+
+  const authors = useMemo(() => {
+    return Array.from(new Set(books.map(book => book.author))).sort();
+  }, [books]);
+
+  const categories = useMemo(() => {
+    return Array.from(new Set(books.map(book => book.category))).sort();
+  }, [books]);
+
+  const handleClearFilters = () => {
+    setSelectedAuthor(null);
+    setSelectedCategory(null);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -114,35 +139,48 @@ const Dashboard = () => {
             <div className="bg-card p-6 rounded-lg book-shadow">
               <h3 className="text-sm font-medium text-muted-foreground">Total Books</h3>
               <p className="text-2xl font-bold text-foreground mt-1">
-                {loading ? '...' : books.length}
+                {loading ? '...' : filteredBooks.length}
               </p>
             </div>
             
             <div className="bg-card p-6 rounded-lg book-shadow">
               <h3 className="text-sm font-medium text-muted-foreground">Categories</h3>
               <p className="text-2xl font-bold text-foreground mt-1">
-                {loading ? '...' : new Set(books.map(book => book.category)).size}
+                {loading ? '...' : categories.length}
               </p>
             </div>
             
             <div className="bg-card p-6 rounded-lg book-shadow">
               <h3 className="text-sm font-medium text-muted-foreground">Authors</h3>
               <p className="text-2xl font-bold text-foreground mt-1">
-                {loading ? '...' : new Set(books.map(book => book.author)).size}
+                {loading ? '...' : authors.length}
               </p>
             </div>
           </div>
         </div>
 
+        {/* Filters */}
+        {!loading && books.length > 0 && (
+          <FilterBar
+            authors={authors}
+            categories={categories}
+            selectedAuthor={selectedAuthor}
+            selectedCategory={selectedCategory}
+            onAuthorChange={setSelectedAuthor}
+            onCategoryChange={setSelectedCategory}
+            onClearFilters={handleClearFilters}
+          />
+        )}
+
         {/* Books Grid */}
         <BookGrid
-          books={books}
+          books={filteredBooks}
           onView={handleView}
           onEdit={isAdmin ? handleEdit : undefined}
           onDelete={isAdmin ? handleDelete : undefined}
           isAdmin={isAdmin}
           loading={loading}
-          emptyMessage="No books in the library yet"
+          emptyMessage="No books match the current filters"
         />
       </main>
     </div>
