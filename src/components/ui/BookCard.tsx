@@ -1,9 +1,9 @@
 import React from 'react';
 import { Book } from '@/types/book';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Edit, Trash2, User } from 'lucide-react';
+import { Edit, Trash2, Star } from 'lucide-react';
 
 interface BookCardProps {
   book: Book;
@@ -29,14 +29,14 @@ const BookCard: React.FC<BookCardProps> = ({
     action();
   };
 
+  // Mock rating - in real app this would come from book data
+  const rating = 4.0 + Math.random() * 0.9; // Mock rating between 4.0-4.9
+
   return (
-    <Card 
-      className="group hover:book-shadow-elevated transition-all duration-300 hover:scale-[1.02] gradient-card border-0 overflow-hidden cursor-pointer"
-      onClick={handleCardClick}
-    >
-      <div className="flex gap-3 p-4">
-        {/* Small Image */}
-        <div className="w-16 h-20 flex-shrink-0 overflow-hidden rounded-md">
+    <div className="group cursor-pointer" onClick={handleCardClick}>
+      <Card className="relative overflow-hidden border-0 bg-transparent">
+        {/* Book Cover */}
+        <div className="relative aspect-[3/4] overflow-hidden rounded-lg book-shadow group-hover:book-shadow-elevated transition-all duration-300">
           <img
             src={book.image}
             alt={book.title}
@@ -46,49 +46,56 @@ const BookCard: React.FC<BookCardProps> = ({
               target.src = '/placeholder.svg';
             }}
           />
-        </div>
-        
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-sm font-semibold line-clamp-2 text-foreground pr-2">
-              {book.title}
-            </h3>
-            {isAdmin && (
-              <div className="flex gap-1 flex-shrink-0">
+          
+          {/* Category Badge */}
+          <div className="absolute top-3 left-3">
+            <Badge variant="secondary" className="text-xs font-medium">
+              {book.category}
+            </Badge>
+          </div>
+          
+          {/* Rating Badge */}
+          <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm rounded-md px-2 py-1 flex items-center gap-1">
+            <Star className="h-3 w-3 text-yellow-400 fill-current" />
+            <span className="text-white text-xs font-medium">{rating.toFixed(1)}</span>
+          </div>
+          
+          {/* Admin Actions */}
+          {isAdmin && (
+            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="flex gap-1">
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
                   onClick={(e) => handleAdminAction(e, () => onEdit?.(book))}
-                  className="p-1 h-6 w-6"
+                  className="h-8 w-8 p-0"
                 >
                   <Edit className="h-3 w-3" />
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="destructive"
                   size="sm"
                   onClick={(e) => handleAdminAction(e, () => onDelete?.(book))}
-                  className="p-1 h-6 w-6 text-destructive hover:text-destructive"
+                  className="h-8 w-8 p-0"
                 >
                   <Trash2 className="h-3 w-3" />
                 </Button>
               </div>
-            )}
-          </div>
-          
-          <div className="space-y-1">
-            <div className="flex items-center text-xs text-muted-foreground">
-              <User className="h-3 w-3 mr-1 flex-shrink-0" />
-              <span className="truncate">{book.author}</span>
             </div>
-            
-            <Badge variant="secondary" className="text-xs h-5">
-              {book.category}
-            </Badge>
-          </div>
+          )}
         </div>
-      </div>
-    </Card>
+        
+        {/* Book Info */}
+        <div className="pt-3">
+          <h3 className="font-semibold text-foreground line-clamp-2 mb-1">
+            {book.title}
+          </h3>
+          <p className="text-muted-foreground text-sm">
+            {book.author}
+          </p>
+        </div>
+      </Card>
+    </div>
   );
 };
 

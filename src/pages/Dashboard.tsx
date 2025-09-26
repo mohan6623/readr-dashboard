@@ -4,17 +4,18 @@ import { Book } from '@/types/book';
 import { bookService } from '@/lib/api';
 import Navigation from '@/components/layout/Navigation';
 import BookGrid from '@/components/ui/BookGrid';
-import FilterBar from '@/components/ui/FilterBar';
+import CategoryTabs from '@/components/ui/CategoryTabs';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Search, Plus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Search, Plus, Grid3X3, List, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedAuthor, setSelectedAuthor] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -75,102 +76,124 @@ const Dashboard = () => {
   // Filter logic
   const filteredBooks = useMemo(() => {
     return books.filter(book => {
-      if (selectedAuthor && book.author !== selectedAuthor) return false;
-      if (selectedCategory && book.category !== selectedCategory) return false;
+      // Category filter
+      if (selectedCategory !== 'All' && book.category !== selectedCategory) return false;
+      
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return book.title.toLowerCase().includes(query) || 
+               book.author.toLowerCase().includes(query);
+      }
+      
       return true;
     });
-  }, [books, selectedAuthor, selectedCategory]);
-
-  const authors = useMemo(() => {
-    return Array.from(new Set(books.map(book => book.author))).sort();
-  }, [books]);
+  }, [books, selectedCategory, searchQuery]);
 
   const categories = useMemo(() => {
-    return Array.from(new Set(books.map(book => book.category))).sort();
+    const uniqueCategories = Array.from(new Set(books.map(book => book.category))).sort();
+    return ['All', ...uniqueCategories];
   }, [books]);
 
-  const handleClearFilters = () => {
-    setSelectedAuthor(null);
-    setSelectedCategory(null);
+  // Mock stats - in real app these would come from user reading data
+  const stats = {
+    total: books.length,
+    currentlyReading: 3, // Mock data
+    completed: 3 // Mock data
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6">
         {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-            <div>
-              <h1 className="text-4xl font-bold text-foreground mb-2">
-                Welcome to Your Library
-              </h1>
-              <p className="text-muted-foreground text-lg">
-                Discover amazing books from our curated collection
-              </p>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+              <BookOpen className="h-6 w-6 text-primary-foreground" />
             </div>
-            
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                onClick={() => navigate('/search')}
-                className="flex items-center gap-2"
-              >
-                <Search className="h-4 w-4" />
-                Search Books
-              </Button>
-              
-              {isAdmin && (
-                <Button
-                  variant="admin"
-                  onClick={() => navigate('/admin/books/new')}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add New Book
-                </Button>
-              )}
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">My Library</h1>
+              <p className="text-muted-foreground">Your personal book collection</p>
             </div>
           </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-card p-6 rounded-lg book-shadow">
-              <h3 className="text-sm font-medium text-muted-foreground">Total Books</h3>
-              <p className="text-2xl font-bold text-foreground mt-1">
-                {loading ? '...' : filteredBooks.length}
-              </p>
+          
+          <div className="flex items-center gap-8 text-right">
+            <div>
+              <div className="text-2xl font-bold text-foreground">{loading ? '...' : stats.total}</div>
+              <div className="text-sm text-muted-foreground">Total Books</div>
             </div>
-            
-            <div className="bg-card p-6 rounded-lg book-shadow">
-              <h3 className="text-sm font-medium text-muted-foreground">Categories</h3>
-              <p className="text-2xl font-bold text-foreground mt-1">
-                {loading ? '...' : categories.length}
-              </p>
+            <div>
+              <div className="text-2xl font-bold text-accent">{stats.currentlyReading}</div>
+              <div className="text-sm text-muted-foreground">Currently Reading</div>
             </div>
-            
-            <div className="bg-card p-6 rounded-lg book-shadow">
-              <h3 className="text-sm font-medium text-muted-foreground">Authors</h3>
-              <p className="text-2xl font-bold text-foreground mt-1">
-                {loading ? '...' : authors.length}
-              </p>
+            <div>
+              <div className="text-2xl font-bold text-accent">{stats.completed}</div>
+              <div className="text-sm text-muted-foreground">Completed</div>
             </div>
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-foreground mb-2 flex items-center gap-2">
+            <BookOpen className="h-8 w-8 text-primary" />
+            Welcome back!
+          </h2>
+          <p className="text-muted-foreground text-lg">
+            Discover your next great read from your curated collection
+          </p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-8">
+          <div className="flex items-center gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search books or authors..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 h-12 text-base"
+              />
+            </div>
+            <div className="flex items-center gap-2 bg-card rounded-lg p-1 book-shadow">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+            {isAdmin && (
+              <Button
+                variant="admin"
+                onClick={() => navigate('/admin/books/new')}
+                className="flex items-center gap-2 h-12"
+              >
+                <Plus className="h-4 w-4" />
+                Add New Book
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Category Tabs */}
         {!loading && books.length > 0 && (
-          <FilterBar
-            authors={authors}
+          <CategoryTabs
             categories={categories}
-            selectedAuthor={selectedAuthor}
             selectedCategory={selectedCategory}
-            onAuthorChange={setSelectedAuthor}
             onCategoryChange={setSelectedCategory}
-            onClearFilters={handleClearFilters}
           />
         )}
+
+        {/* Results Count */}
+        <div className="mb-6">
+          <p className="text-muted-foreground">
+            {loading ? 'Loading...' : `${filteredBooks.length} books found`}
+          </p>
+        </div>
 
         {/* Books Grid */}
         <BookGrid
