@@ -102,7 +102,7 @@ const BookCard: React.FC<BookCardProps> = ({
 
   return (
     <div className="group cursor-pointer" onClick={handleCardClick}>
-      <Card className="relative overflow-hidden border-0 bg-transparent">
+      <Card className="relative overflow-hidden border border-border bg-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-book-shadow/20">
         {/* Book Cover */}
         <div className="relative aspect-[3/4] overflow-hidden rounded-lg book-shadow group-hover:book-shadow-elevated transition-all duration-300">
           <img
@@ -117,7 +117,7 @@ const BookCard: React.FC<BookCardProps> = ({
           
           {/* Category Badge - moved to top-right */}
           <div className="absolute top-3 right-3">
-            <Badge variant="secondary" className="text-xs font-medium">
+            <Badge variant="secondary" className="text-xs font-medium bg-background/80 backdrop-blur-sm">
               {book.category}
             </Badge>
           </div>
@@ -154,11 +154,11 @@ const BookCard: React.FC<BookCardProps> = ({
         </div>
         
         {/* Book Info */}
-        <div className="pt-3">
-          <h3 className="font-semibold text-foreground line-clamp-2 mb-1">
+        <div className="p-4 space-y-2">
+          <h3 className="font-semibold text-sm text-foreground line-clamp-2">
             {book.title}
           </h3>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-xs">
             {book.author}
           </p>
         </div>
