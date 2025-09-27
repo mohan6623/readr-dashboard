@@ -115,8 +115,8 @@ const BookCard: React.FC<BookCardProps> = ({
             }}
           />
           
-          {/* Category Badge */}
-          <div className="absolute top-3 left-3">
+          {/* Category Badge - moved to top-right */}
+          <div className="absolute top-3 right-3">
             <Badge variant="secondary" className="text-xs font-medium">
               {book.category}
             </Badge>
@@ -128,15 +128,15 @@ const BookCard: React.FC<BookCardProps> = ({
             <span className="text-white text-xs font-medium">{rating.toFixed(1)}</span>
           </div>
           
-          {/* Admin Actions */}
+          {/* Admin Actions - moved to bottom of card */}
           {isAdmin && (
-            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               <div className="flex gap-1">
                 <Button
                   variant="secondary"
                   size="sm"
                   onClick={(e) => handleAdminAction(e, () => onEdit?.(book))}
-                  className="h-8 w-8 p-0"
+                  className="h-6 w-6 p-0 bg-black/70 hover:bg-black/80"
                 >
                   <Edit className="h-3 w-3" />
                 </Button>
@@ -144,7 +144,7 @@ const BookCard: React.FC<BookCardProps> = ({
                   variant="destructive"
                   size="sm"
                   onClick={(e) => handleAdminAction(e, () => onDelete?.(book))}
-                  className="h-8 w-8 p-0"
+                  className="h-6 w-6 p-0 bg-black/70 hover:bg-red-600/80"
                 >
                   <Trash2 className="h-3 w-3" />
                 </Button>
