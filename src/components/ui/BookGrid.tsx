@@ -10,6 +10,7 @@ interface BookGridProps {
   isAdmin?: boolean;
   loading?: boolean;
   emptyMessage?: string;
+  viewMode?: 'grid' | 'list';
 }
 
 const BookGrid: React.FC<BookGridProps> = ({
@@ -19,18 +20,35 @@ const BookGrid: React.FC<BookGridProps> = ({
   onDelete,
   isAdmin = false,
   loading = false,
-  emptyMessage = "No books found"
+  emptyMessage = "No books found",
+  viewMode = 'grid'
 }) => {
   if (loading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+      <div className={viewMode === 'grid' 
+        ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"
+        : "space-y-4"
+      }>
         {Array.from({ length: 10 }).map((_, index) => (
           <div key={index} className="animate-pulse">
-            <div className="aspect-[3/4] bg-muted rounded-lg mb-3"></div>
-            <div className="space-y-2">
-              <div className="h-4 bg-muted rounded w-3/4"></div>
-              <div className="h-3 bg-muted rounded w-1/2"></div>
-            </div>
+            {viewMode === 'grid' ? (
+              <>
+                <div className="aspect-[3/4] bg-muted rounded-lg mb-3"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="h-3 bg-muted rounded w-1/2"></div>
+                </div>
+              </>
+            ) : (
+              <div className="flex gap-4 p-4 bg-card rounded-lg">
+                <div className="w-16 h-20 bg-muted rounded"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="h-3 bg-muted rounded w-1/2"></div>
+                  <div className="h-3 bg-muted rounded w-1/4"></div>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -69,7 +87,10 @@ const BookGrid: React.FC<BookGridProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+    <div className={viewMode === 'grid' 
+      ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"
+      : "space-y-4"
+    }>
       {books.map((book) => (
         <BookCard
           key={book.id}
@@ -78,6 +99,7 @@ const BookGrid: React.FC<BookGridProps> = ({
           onEdit={onEdit}
           onDelete={onDelete}
           isAdmin={isAdmin}
+          viewMode={viewMode}
         />
       ))}
     </div>

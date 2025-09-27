@@ -16,6 +16,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -159,10 +160,20 @@ const Dashboard = () => {
               />
             </div>
             <div className="flex items-center gap-2 bg-card rounded-lg p-1 book-shadow">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <Button 
+                variant={viewMode === 'grid' ? "default" : "ghost"} 
+                size="sm" 
+                className="h-8 w-8 p-0"
+                onClick={() => setViewMode('grid')}
+              >
                 <Grid3X3 className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <Button 
+                variant={viewMode === 'list' ? "default" : "ghost"} 
+                size="sm" 
+                className="h-8 w-8 p-0"
+                onClick={() => setViewMode('list')}
+              >
                 <List className="h-4 w-4" />
               </Button>
             </div>
@@ -195,7 +206,7 @@ const Dashboard = () => {
           </p>
         </div>
 
-        {/* Books Grid */}
+        {/* Books Display */}
         <BookGrid
           books={filteredBooks}
           onView={handleView}
@@ -204,6 +215,7 @@ const Dashboard = () => {
           isAdmin={isAdmin}
           loading={loading}
           emptyMessage="No books match the current filters"
+          viewMode={viewMode}
         />
       </main>
     </div>

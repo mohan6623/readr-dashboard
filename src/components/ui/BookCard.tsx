@@ -11,6 +11,7 @@ interface BookCardProps {
   onEdit?: (book: Book) => void;
   onDelete?: (book: Book) => void;
   isAdmin?: boolean;
+  viewMode?: 'grid' | 'list';
 }
 
 const BookCard: React.FC<BookCardProps> = ({ 
@@ -18,7 +19,8 @@ const BookCard: React.FC<BookCardProps> = ({
   onView, 
   onEdit, 
   onDelete, 
-  isAdmin = false 
+  isAdmin = false,
+  viewMode = 'grid'
 }) => {
   const handleCardClick = () => {
     onView?.(book);
@@ -31,6 +33,72 @@ const BookCard: React.FC<BookCardProps> = ({
 
   // Mock rating - in real app this would come from book data
   const rating = 4.0 + Math.random() * 0.9; // Mock rating between 4.0-4.9
+
+  if (viewMode === 'list') {
+    return (
+      <div className="group cursor-pointer" onClick={handleCardClick}>
+        <Card className="flex items-center gap-4 p-4 hover:book-shadow-elevated transition-all duration-300">
+          {/* Book Cover */}
+          <div className="relative w-16 h-20 flex-shrink-0 overflow-hidden rounded book-shadow">
+            <img
+              src={book.image}
+              alt={book.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = '/placeholder.svg';
+              }}
+            />
+          </div>
+          
+          {/* Book Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h3 className="font-semibold text-foreground truncate mb-1">
+                  {book.title}
+                </h3>
+                <p className="text-muted-foreground text-sm mb-2">
+                  {book.author}
+                </p>
+                <div className="flex items-center gap-3">
+                  <Badge variant="secondary" className="text-xs">
+                    {book.category}
+                  </Badge>
+                  <div className="flex items-center gap-1">
+                    <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                    <span className="text-muted-foreground text-xs">{rating.toFixed(1)}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Admin Actions */}
+              {isAdmin && (
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={(e) => handleAdminAction(e, () => onEdit?.(book))}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={(e) => handleAdminAction(e, () => onDelete?.(book))}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="group cursor-pointer" onClick={handleCardClick}>
