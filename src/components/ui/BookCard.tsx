@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Book } from '@/types/book';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, Star } from 'lucide-react';
+import { Edit, Trash2, Star, User } from 'lucide-react';
+import { useDominantColor } from '@/hooks/useDominantColor';
 
 interface BookCardProps {
   book: Book;
@@ -22,6 +23,12 @@ const BookCard: React.FC<BookCardProps> = ({
   isAdmin = false,
   viewMode = 'grid'
 }) => {
+  const { rgba, hex } = useDominantColor(book.image);
+  // Compose inline style with CSS custom properties for colorized hover
+  const colorStyle = useMemo(() => ({
+    // Base hex for borders/rings if needed
+    ['--book-accent' as any]: hex,
+  }), [hex]);
   const handleCardClick = () => {
     onView?.(book);
   };
@@ -36,8 +43,24 @@ const BookCard: React.FC<BookCardProps> = ({
 
   if (viewMode === 'list') {
     return (
-      <div className="group cursor-pointer" onClick={handleCardClick}>
-        <Card className="flex items-center gap-4 p-4 hover:book-shadow-elevated transition-all duration-300">
+      <div className="group cursor-pointer" onClick={handleCardClick} style={colorStyle as React.CSSProperties}>
+        <Card className="relative flex items-center gap-4 p-4 hover:book-shadow-elevated transition-all duration-300">
+          {/* Hover tint overlay */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            style={{ background: rgba(0.18) }}
+          />
+          {/* Hover ring overlay */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-lg ring-0 group-hover:ring-4 transition-[box-shadow,ring-width] duration-300"
+            style={{
+              // Tailwind ring color override
+              // @ts-ignore
+              '--tw-ring-color': rgba(0.6) as any,
+            }}
+          />
           {/* Book Cover */}
           <div className="relative w-16 h-20 flex-shrink-0 overflow-hidden rounded book-shadow">
             <img
@@ -58,7 +81,8 @@ const BookCard: React.FC<BookCardProps> = ({
                 <h3 className="font-semibold text-foreground truncate mb-1">
                   {book.title}
                 </h3>
-                <p className="text-muted-foreground text-sm mb-2">
+                <p className="text-muted-foreground text-sm mb-2 flex items-center">
+                  <User className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" aria-hidden="true" />
                   {book.author}
                 </p>
                 <div className="flex items-center gap-3">
@@ -101,10 +125,24 @@ const BookCard: React.FC<BookCardProps> = ({
   }
 
   return (
-    <div className="group cursor-pointer" onClick={handleCardClick}>
-      <Card className="relative overflow-hidden border border-border bg-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-book-shadow/20">
+      <div className="group cursor-pointer" onClick={handleCardClick} style={colorStyle as React.CSSProperties}>
+    <Card className="relative overflow-hidden border border-border bg-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-book-shadow/20" style={{ boxShadow: `0 0 0 0 rgba(0,0,0,0)` }}>
+          {/* Hover tint overlay and ring using dominant color */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            style={{ background: rgba(0.22) }}
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-lg ring-0 group-hover:ring-4 transition-[box-shadow,ring-width] duration-300"
+            style={{ boxShadow: `0 0 0 0 ${rgba(0.4)}`, borderRadius: 'inherit',
+                     // Tailwind ring uses CSS var; apply dynamic ring color
+                     // @ts-ignore
+                     '--tw-ring-color': rgba(0.6) as any }}
+          />
         {/* Book Cover */}
-        <div className="relative aspect-[3/4] overflow-hidden rounded-lg book-shadow group-hover:book-shadow-elevated transition-all duration-300">
+        <div className="relative aspect-[3/4] overflow-hidden rounded-t-lg book-shadow group-hover:book-shadow-elevated transition-all duration-300">
           <img
             src={book.image}
             alt={book.title}
@@ -153,12 +191,15 @@ const BookCard: React.FC<BookCardProps> = ({
           )}
         </div>
         
-        {/* Book Info */}
-        <div className="p-4 space-y-2">
-          <h3 className="font-semibold text-sm text-foreground line-clamp-2">
+        {/* Book Info with hover background */}
+  <div className="relative p-4 space-y-2 transition-colors duration-300 rounded-b-lg bg-card">
+          {/* Local hover tint for info area only (stronger) */}
+          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b-lg" style={{ background: rgba(0.28) }} />
+          <h3 className="font-semibold text-sm text-foreground truncate">
             {book.title}
           </h3>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-muted-foreground text-xs flex items-center">
+            <User className="h-3 w-3 mr-1.5 text-muted-foreground" aria-hidden="true" />
             {book.author}
           </p>
         </div>

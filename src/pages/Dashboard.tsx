@@ -7,8 +7,7 @@ import BookGrid from '@/components/ui/BookGrid';
 import CategoryTabs from '@/components/ui/CategoryTabs';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Search, Grid3X3, List, BookOpen, Library } from 'lucide-react';
+import { Grid3X3, List, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
@@ -73,8 +72,6 @@ const Dashboard = () => {
       }
     }
   };
-
-  // Filter logic
   const filteredBooks = useMemo(() => {
     return books.filter(book => {
       // Category filter
@@ -96,106 +93,86 @@ const Dashboard = () => {
     return ['All', ...uniqueCategories];
   }, [books]);
 
-  // Mock stats - in real app these would come from user reading data
-  const stats = {
-    total: books.length,
-    currentlyReading: 3, // Mock data
-    completed: 3 // Mock data
-  };
+  // Stats: total books, unique categories, unique authors
+  const stats = useMemo(() => {
+    const categoryCount = new Set(books.map((b) => b.category).filter(Boolean)).size;
+    const authorCount = new Set(books.map((b) => b.author).filter(Boolean)).size;
+    return {
+      total: books.length,
+      categories: categoryCount,
+      authors: authorCount,
+    };
+  }, [books]);
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      {/* Sticky Header mirroring inspiration page */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary text-primary-foreground">
-                <Library className="w-6 h-6" />
+      <main className="container mx-auto px-4 py-6">
+        {/* Welcome Section with Stats on the right */}
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <BookOpen className="w-5 h-5 text-accent" />
+                <h2 className="text-xl font-semibold text-foreground">Welcome back!</h2>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">My Library</h1>
-                <p className="text-sm text-muted-foreground">Your personal book collection</p>
-              </div>
+              <p className="text-muted-foreground">
+                Discover your next great read from your curated collection
+              </p>
             </div>
-
-            {/* Quick Stats */}
-            <div className="hidden sm:flex items-center gap-6 text-right">
+            {/* Stats moved here to the right */}
+            <div className="flex items-center gap-6 text-right">
               <div className="text-center">
                 <div className="text-2xl font-bold text-foreground">{loading ? '...' : stats.total}</div>
                 <div className="text-xs text-muted-foreground">Total Books</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-accent">{stats.currentlyReading}</div>
-                <div className="text-xs text-muted-foreground">Currently Reading</div>
+                <div className="text-2xl font-bold text-accent">{stats.categories}</div>
+                <div className="text-xs text-muted-foreground">Categories</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">{stats.completed}</div>
-                <div className="text-xs text-muted-foreground">Completed</div>
+                <div className="text-2xl font-bold text-primary">{stats.authors}</div>
+                <div className="text-xs text-muted-foreground">Authors</div>
               </div>
             </div>
           </div>
         </div>
-      </header>
-      
-  <main className="container mx-auto px-4 py-6">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
-            <BookOpen className="w-5 h-5 text-accent" />
-            <h2 className="text-xl font-semibold text-foreground">Welcome back!</h2>
-          </div>
-          <p className="text-muted-foreground">
-            Discover your next great read from your curated collection
-          </p>
-        </div>
 
-        {/* Search + View mode toggle */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4">
-            {/* Search before layout change buttons */}
-            <div className="relative flex-1 min-w-0 w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search books or authors..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-10 text-sm w-full"
-              />
-            </div>
-            <div className="flex items-center gap-2 bg-card rounded-lg p-1 book-shadow">
-              <Button 
-                variant={viewMode === 'grid' ? "default" : "ghost"} 
-                size="sm" 
-                className="h-8 w-8 p-0"
-                onClick={() => setViewMode('grid')}
-              >
-                <Grid3X3 className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant={viewMode === 'list' ? "default" : "ghost"} 
-                size="sm" 
-                className="h-8 w-8 p-0"
-                onClick={() => setViewMode('list')}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Category Tabs */}
+        {/* Filter row: Category Tabs (left) + View mode toggle (right) */}
         {!loading && books.length > 0 && (
-          <CategoryTabs
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onCategoryChange={setSelectedCategory}
-          />
+          <div className="mb-4">
+            <div className="flex items-center justify-between gap-4 whitespace-nowrap">
+              <div className="flex-1 min-w-0 overflow-x-auto whitespace-nowrap pr-2">
+                <CategoryTabs
+                  categories={categories}
+                  selectedCategory={selectedCategory}
+                  onCategoryChange={setSelectedCategory}
+                />
+              </div>
+              <div className="flex items-center gap-2 bg-card rounded-lg p-1 book-shadow flex-shrink-0">
+                <Button 
+                  variant={viewMode === 'grid' ? "default" : "ghost"} 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={() => setViewMode('grid')}
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant={viewMode === 'list' ? "default" : "ghost"} 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={() => setViewMode('list')}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Results Count */}
-        <div className="mb-6">
+        <div className="mb-2">
           <p className="text-muted-foreground">
             {loading ? 'Loading...' : `${filteredBooks.length} books found`}
           </p>
