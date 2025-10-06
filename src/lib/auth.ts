@@ -19,14 +19,26 @@ class AuthService {
     });
 
     if (!response.ok) {
-      throw new Error('Login failed');
+      const errorText = await response.text();
+      throw new Error(errorText || 'Login failed');
     }
 
-    const authResponse: AuthResponse = await response.json();
-    this.setToken(authResponse.token);
-    this.setUser(authResponse.user);
+    const data = await response.json();
+    const token = data.token;
     
-    return authResponse;
+    // Decode JWT to extract user information
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const user: User = {
+      id: payload.sub || payload.userId || 0,
+      name: payload.username || credentials.username,
+      email: payload.email || '',
+      role: payload.role || 'ROLE_USER'
+    };
+
+    this.setToken(token);
+    this.setUser(user);
+    
+    return { token, user };
   }
 
   async register(userData: RegisterData): Promise<AuthResponse> {
@@ -37,16 +49,16 @@ class AuthService {
       },
       body: JSON.stringify({
         username: userData.username,
-        password: userData.password,
-        role: userData.role || 'ROLE_USER'
+        password: userData.password
       }),
     });
 
     if (!response.ok) {
-      throw new Error('Registration failed');
+      const errorText = await response.text();
+      throw new Error(errorText || 'Registration failed');
     }
 
-    // After registration, attempt to login
+    // After successful registration, automatically login
     return this.login({ username: userData.username, password: userData.password });
   }
 
