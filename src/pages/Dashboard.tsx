@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Book } from '@/types/book';
 import { bookService } from '@/lib/api';
+import { reviewsService } from '@/lib/reviews';
 import Navigation from '@/components/layout/Navigation';
 import BookGrid from '@/components/ui/BookGrid';
 import CategoryTabs from '@/components/ui/CategoryTabs';
@@ -28,7 +29,26 @@ const Dashboard = () => {
     try {
       setLoading(true);
       const fetchedBooks = await bookService.getAllBooks();
-      setBooks(fetchedBooks);
+      
+      // Load rating stats for each book
+      const booksWithRatings = await Promise.all(
+        fetchedBooks.map(async (book) => {
+          try {
+            const stats = await reviewsService.getBookRatingStats(book.id);
+            return {
+              ...book,
+              avgRating: stats.avgRating,
+              totalReviews: stats.totalReviews,
+              ratingBreakdown: stats.breakdown,
+            };
+          } catch (error) {
+            // If rating fetch fails, just return book without ratings
+            return book;
+          }
+        })
+      );
+      
+      setBooks(booksWithRatings);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch books';
       if (errorMessage.includes('authentication')) {

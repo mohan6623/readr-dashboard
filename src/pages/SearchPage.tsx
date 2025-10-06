@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Book, SearchFilters } from '@/types/book';
 import { bookService } from '@/lib/api';
+import { reviewsService } from '@/lib/reviews';
 import Navigation from '@/components/layout/Navigation';
 import SearchBar from '@/components/search/SearchBar';
 import BookGrid from '@/components/ui/BookGrid';
@@ -46,7 +47,25 @@ const SearchPage = () => {
 
       // Perform search
       const results = await bookService.searchBooks(filters);
-      setBooks(results);
+      
+      // Load rating stats for each book
+      const booksWithRatings = await Promise.all(
+        results.map(async (book) => {
+          try {
+            const stats = await reviewsService.getBookRatingStats(book.id);
+            return {
+              ...book,
+              avgRating: stats.avgRating,
+              totalReviews: stats.totalReviews,
+              ratingBreakdown: stats.breakdown,
+            };
+          } catch (error) {
+            return book;
+          }
+        })
+      );
+      
+      setBooks(booksWithRatings);
     } catch (error) {
       toast({
         title: "Search failed",

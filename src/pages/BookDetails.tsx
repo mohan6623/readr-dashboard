@@ -1,20 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Book } from '@/types/book';
+import { Book, Review } from '@/types/book';
 import { bookService } from '@/lib/api';
+import { reviewsService } from '@/lib/reviews';
 import Navigation from '@/components/layout/Navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Edit, Trash2, User, Calendar, Loader2 } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, User, Calendar, Loader2, Star } from 'lucide-react';
+import { StarRating } from '@/components/reviews/StarRating';
+import { RatingBreakdown } from '@/components/reviews/RatingBreakdown';
+import { ReviewForm } from '@/components/reviews/ReviewForm';
+import { ReviewsList } from '@/components/reviews/ReviewsList';
 
 const BookDetails = () => {
   const [book, setBook] = useState<Book | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [userReview, setUserReview] = useState<Review | null>(null);
   const [loading, setLoading] = useState(true);
   const { id } = useParams<{ id: string }>();
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -30,7 +37,24 @@ const BookDetails = () => {
     try {
       setLoading(true);
       const fetchedBook = await bookService.getBookById(id);
+      
+      // Get rating stats
+      const stats = await reviewsService.getBookRatingStats(parseInt(id));
+      fetchedBook.avgRating = stats.avgRating;
+      fetchedBook.totalReviews = stats.totalReviews;
+      fetchedBook.ratingBreakdown = stats.breakdown;
+      
       setBook(fetchedBook);
+      
+      // Load reviews
+      const bookReviews = await reviewsService.getBookReviews(parseInt(id));
+      setReviews(bookReviews);
+      
+      // Check if user has already reviewed
+      if (user) {
+        const existingReview = await reviewsService.getUserReviewForBook(parseInt(id));
+        setUserReview(existingReview);
+      }
     } catch (error) {
       toast({
         title: "Error loading book",
@@ -41,6 +65,10 @@ const BookDetails = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleReviewSubmitted = () => {
+    loadBook(); // Reload book to get updated ratings
   };
 
   const handleDelete = async () => {
@@ -149,6 +177,14 @@ const BookDetails = () => {
                     <User className="h-5 w-5 mr-2" />
                     <span>by {book.author}</span>
                   </div>
+                  {book.avgRating && book.avgRating > 0 && (
+                    <div className="flex items-center gap-2 mb-4">
+                      <StarRating rating={book.avgRating} size="lg" showValue />
+                      <span className="text-sm text-muted-foreground">
+                        ({book.totalReviews} {book.totalReviews === 1 ? 'review' : 'reviews'})
+                      </span>
+                    </div>
+                  )}
                 </div>
                 
                 {isAdmin && (
@@ -238,6 +274,56 @@ const BookDetails = () => {
                     </div>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Rating Breakdown */}
+            {book.ratingBreakdown && book.totalReviews && book.totalReviews > 0 && (
+              <Card className="book-shadow">
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-semibold text-foreground mb-4">
+                    Rating Breakdown
+                  </h2>
+                  <RatingBreakdown 
+                    breakdown={book.ratingBreakdown} 
+                    totalReviews={book.totalReviews} 
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Review Form */}
+            {user && (
+              <ReviewForm 
+                bookId={book.id} 
+                onReviewSubmitted={handleReviewSubmitted}
+                existingReview={userReview ? {
+                  rating: userReview.rating,
+                  comment: userReview.comment
+                } : undefined}
+              />
+            )}
+
+            {!user && (
+              <Card className="book-shadow">
+                <CardContent className="p-6 text-center">
+                  <p className="text-muted-foreground mb-4">
+                    Please log in to write a review
+                  </p>
+                  <Button onClick={() => navigate('/login')}>
+                    Log In
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Reviews List */}
+            <Card className="book-shadow">
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold text-foreground mb-4">
+                  User Reviews
+                </h2>
+                <ReviewsList reviews={reviews} />
               </CardContent>
             </Card>
           </div>

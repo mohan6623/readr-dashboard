@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Library, Search, Sparkles, Users, TrendingUp } from 'lucide-react';
+import { BookOpen, MessageSquare, Star, Users, TrendingUp, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect } from 'react';
 
@@ -40,20 +40,20 @@ const LandingPage = () => {
       <section className="container mx-auto px-4 py-20 md:py-32">
         <div className="text-center max-w-4xl mx-auto space-y-6 animate-fade-in">
           <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full text-sm mb-4">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-foreground">Your Personal Book Haven</span>
+            <Star className="h-4 w-4 text-primary fill-amber-400 text-amber-400" />
+            <span className="text-foreground">Share Your Book Reviews</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-            Discover, Share & Track
+            Rate, Review & Discuss
             <span className="block bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-              Your Reading Journey
+              Your Favorite Books
             </span>
           </h1>
           
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Join a vibrant community of book lovers. Organize your library, discover new reads, 
-            and connect with fellow readers in one beautiful platform.
+            Join a vibrant community of readers. Share your honest reviews, discover what others think, 
+            and help fellow readers find their next great book.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
@@ -62,7 +62,7 @@ const LandingPage = () => {
               onClick={() => navigate('/register')}
               className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity text-lg px-8"
             >
-              Start Reading Free
+              Start Reviewing Free
             </Button>
             <Button 
               size="lg" 
@@ -81,31 +81,31 @@ const LandingPage = () => {
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           <div className="bg-card p-8 rounded-2xl border shadow-lg hover:shadow-xl transition-shadow animate-fade-in">
             <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-              <Library className="h-6 w-6 text-primary" />
+              <Star className="h-6 w-6 text-amber-400 fill-amber-400" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Organize Your Library</h3>
+            <h3 className="text-xl font-semibold mb-2">5-Star Ratings</h3>
             <p className="text-muted-foreground">
-              Keep all your books in one place with smart categorization and easy search functionality.
+              Rate books with our intuitive 5-star system and see detailed rating breakdowns from the community.
             </p>
           </div>
 
           <div className="bg-card p-8 rounded-2xl border shadow-lg hover:shadow-xl transition-shadow animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <div className="h-12 w-12 bg-accent/10 rounded-xl flex items-center justify-center mb-4">
-              <Search className="h-6 w-6 text-accent" />
+              <MessageSquare className="h-6 w-6 text-accent" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Smart Discovery</h3>
+            <h3 className="text-xl font-semibold mb-2">Honest Reviews</h3>
             <p className="text-muted-foreground">
-              Find your next favorite book with advanced filters and personalized recommendations.
+              Share your thoughts and read authentic reviews from real readers like you.
             </p>
           </div>
 
           <div className="bg-card p-8 rounded-2xl border shadow-lg hover:shadow-xl transition-shadow animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <div className="h-12 w-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
-              <Users className="h-6 w-6 text-primary" />
+              <BarChart3 className="h-6 w-6 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Community Driven</h3>
+            <h3 className="text-xl font-semibold mb-2">Rating Insights</h3>
             <p className="text-muted-foreground">
-              Connect with fellow readers, share reviews, and discover books loved by the community.
+              See how many users gave each star rating, just like your favorite shopping platforms.
             </p>
           </div>
         </div>
@@ -117,15 +117,15 @@ const LandingPage = () => {
           <div className="grid grid-cols-3 gap-8 text-center">
             <div className="animate-fade-in">
               <div className="text-4xl md:text-5xl font-bold text-primary mb-2">10K+</div>
-              <div className="text-muted-foreground">Books Available</div>
+              <div className="text-muted-foreground">Books to Review</div>
             </div>
             <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
               <div className="text-4xl md:text-5xl font-bold text-accent mb-2">5K+</div>
-              <div className="text-muted-foreground">Active Readers</div>
+              <div className="text-muted-foreground">Active Reviewers</div>
             </div>
             <div className="animate-fade-in" style={{ animationDelay: '0.2s' }}>
               <div className="text-4xl md:text-5xl font-bold text-primary mb-2">50K+</div>
-              <div className="text-muted-foreground">Reviews Shared</div>
+              <div className="text-muted-foreground">Reviews Written</div>
             </div>
           </div>
         </div>
@@ -136,17 +136,17 @@ const LandingPage = () => {
         <div className="max-w-3xl mx-auto text-center space-y-6 animate-fade-in">
           <TrendingUp className="h-12 w-12 text-primary mx-auto" />
           <h2 className="text-4xl md:text-5xl font-bold">
-            Ready to Transform Your Reading Experience?
+            Ready to Share Your Book Opinions?
           </h2>
           <p className="text-xl text-muted-foreground">
-            Join thousands of readers who've already discovered their perfect book community.
+            Join thousands of reviewers helping readers discover their next favorite book.
           </p>
           <Button 
             size="lg" 
             onClick={() => navigate('/register')}
             className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity text-lg px-8"
           >
-            Create Free Account
+            Start Reviewing Now
           </Button>
         </div>
       </section>

@@ -9,6 +9,26 @@ export interface Book {
   image: string; // Base64 or URL for display
   createdAt?: string;
   updatedAt?: string;
+  avgRating?: number;
+  totalReviews?: number;
+  ratingBreakdown?: {
+    1: number;
+    2: number;
+    3: number;
+    4: number;
+    5: number;
+  };
+}
+
+export interface Review {
+  id: string;
+  book_id: number;
+  user_id: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+  updated_at: string;
+  user_name?: string;
 }
 
 export interface User {

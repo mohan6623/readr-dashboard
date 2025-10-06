@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Star, User } from 'lucide-react';
 import { useDominantColor } from '@/hooks/useDominantColor';
+import { StarRating } from '@/components/reviews/StarRating';
 
 interface BookCardProps {
   book: Book;
@@ -37,9 +38,6 @@ const BookCard: React.FC<BookCardProps> = ({
     e.stopPropagation();
     action();
   };
-
-  // Mock rating - in real app this would come from book data
-  const rating = 4.0 + Math.random() * 0.9; // Mock rating between 4.0-4.9
 
   if (viewMode === 'list') {
     return (
@@ -89,10 +87,14 @@ const BookCard: React.FC<BookCardProps> = ({
                   <Badge variant="secondary" className="text-xs">
                     {book.category}
                   </Badge>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                    <span className="text-muted-foreground text-xs">{rating.toFixed(1)}</span>
-                  </div>
+                  {book.avgRating && book.avgRating > 0 && (
+                    <div className="flex items-center gap-1">
+                      <StarRating rating={book.avgRating} size="sm" />
+                      <span className="text-muted-foreground text-xs">
+                        ({book.totalReviews})
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -161,10 +163,15 @@ const BookCard: React.FC<BookCardProps> = ({
           </div>
           
           {/* Rating Badge */}
-          <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm rounded-md px-2 py-1 flex items-center gap-1">
-            <Star className="h-3 w-3 text-yellow-400 fill-current" />
-            <span className="text-white text-xs font-medium">{rating.toFixed(1)}</span>
-          </div>
+          {book.avgRating && book.avgRating > 0 && (
+            <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm rounded-md px-2 py-1 flex items-center gap-1">
+              <Star className="h-3 w-3 text-yellow-400 fill-current" />
+              <span className="text-white text-xs font-medium">{book.avgRating.toFixed(1)}</span>
+              {book.totalReviews && (
+                <span className="text-white/70 text-xs ml-1">({book.totalReviews})</span>
+              )}
+            </div>
+          )}
           
           {/* Admin Actions - moved to bottom of card */}
           {isAdmin && (
